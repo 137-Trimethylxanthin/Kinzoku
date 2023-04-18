@@ -1,6 +1,11 @@
+import datetime
 import random
 import time
 import os
+import sys
+
+if sys.argv[1] == 'gui':
+    from tkinter import *
 
 
 def clear():
@@ -55,11 +60,80 @@ def custom_input():
             return answer
 
 
-def awnser(num1, num2, op, answer: int):
+def answer(num1, num2, op, answer: int):
     if int(eval(f"{num1} {op} {num2}")) == int(answer):
         return True
     else:
         return False
+
+
+def gui():
+    root = Tk()
+    root.title("Mathe Spiel")
+    lab = Label(root)
+    lab.pack()
+    root.geometry("500x800")
+    root.resizable(False, False)
+    root.configure(bg="black")
+
+    clac_flield = Entry(root, width=500, borderwidth=5)
+    clac_flield.grid(row=0, column=0, columnspan=4, padx=10, pady=10)
+    clac_flield.pack()
+
+    # Buttons for calculator
+    one = Button(root, text="1", width=10, height=5, bg="white", fg="black")
+    one.grid(row=0, column=1)
+
+    two = Button(root, text="2", width=10, height=5, bg="white", fg="black")
+    two.grid(row=1, column=1)
+
+    three = Button(root, text="3", width=10, height=5, bg="white", fg="black")
+    three.grid(row=2, column=1)
+
+    four = Button(root, text="4", width=10, height=5, bg="white", fg="black")
+    four.grid(row=0, column=2)
+
+    five = Button(root, text="5", width=10, height=5, bg="white", fg="black")
+    five.grid(row=1, column=2)
+
+    six = Button(root, text="6", width=10, height=5, bg="white", fg="black")
+    six.grid(row=2, column=2)
+
+    seven = Button(root, text="7", width=10, height=5, bg="white", fg="black")
+    seven.grid(row=0, column=3)
+
+    eight = Button(root, text="8", width=10, height=5, bg="white", fg="black")
+    eight.grid(row=1, column=3)
+
+    nine = Button(root, text="9", width=10, height=5, bg="white", fg="black")
+    nine.grid(row=2, column=3)
+
+    zero = Button(root, text="0", width=10, height=5, bg="white", fg="black")
+    zero.grid(row=3, column=0)
+
+    plus = Button(root, text="+", width=10, height=5, bg="white", fg="black")
+
+    minus = Button(root, text="-", width=10, height=5, bg="white", fg="black")
+
+    mal = Button(root, text="*", width=10, height=5, bg="white", fg="black")
+
+    durch = Button(root, text="/", width=10, height=5, bg="white", fg="black")
+
+    clear = Button(root, text="C", width=10, height=5, bg="white", fg="black")
+
+    enter = Button(root, text="Enter", width=10, height=5, bg="white", fg="black")
+
+
+    for r in range(3):
+        for c in range(4):
+            Label(root, text='R%s/C%s' % (r, c), borderwidth=1).grid(row=r, column=c)
+    def clock():
+        time = datetime.datetime.now().strftime("Time: %H:%M:%S")
+        lab.config(text=time)
+        root.after(1000, clock)  # run itself again after 1000 ms
+
+    clock()
+    root.mainloop()
 
 
 def game():
@@ -75,7 +149,7 @@ def game():
         end = time.time()
         questions -= 1
         timer = end - start
-        if awnser(num1, num2, op, answer):
+        if answer(num1, num2, op, answer):
             print("Richtig")
             if timer < 10:
                 points += 3
@@ -102,5 +176,8 @@ def game():
 
 
 if __name__ == '__main__':
-    game_start()
-    game()
+    if sys.argv[1] == 'gui':
+        gui()
+    else:
+        game_start()
+        game()
