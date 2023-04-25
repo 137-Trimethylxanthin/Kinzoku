@@ -3,7 +3,6 @@ import random
 import os
 import sys
 import time
-import math
 
 def clrscr() -> None:
     if os.name == "nt":
@@ -35,8 +34,19 @@ def gen_division() -> list:
     res = int(num1 / num2)
     return [num1, num2, res, "/"]
 
+def gen_recomms(cor: int) -> str:
+    ret = [cor]
+    for i in range(4):
+        lower = cor - 100 if cor > 100 else 1
+        upper = cor + 100 if cor < 901 else 1000
+        rand = random.randint(cor - 100 if cor > 100 else 1, cor + 100 if cor < 901 else 1000)
+        while rand == cor:
+            rand = random.randint(cor - 100 if cor > 100 else 1, cor + 100 if cor < 901 else 1000)
+        ret.append(rand)
+    return ret
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(prog="Konzoku", description="Python Kopfrechentrainer")
+    parser = argparse.ArgumentParser(prog="Kinzoku", description="Python Kopfrechentrainer")
     parser.add_argument("-g", "--gui", action="store_true", default=False, dest="use_gui", help="Öffnet das Programm mit einer grafischen Benutzeroberfläche")
     parser.add_argument("-e", "--easy", action="store_true", default=False, dest="use_easy", help="Aktiviert den Easy-Modus bei dem dir fünf potenziell richtige Ergebnisse vorgeschlagen werden")
     parser.add_argument("-v", "--verbose", action="store_true", default=False, dest="use_verbose", help="Aktiviert den verbosen Modus")
@@ -49,9 +59,14 @@ if __name__ == "__main__":
         while True:
             pass
     clrscr()
+    for i in range(5):
+        print(gen_recomms(485))
+    sys.exit(0)
     print("Willkommen bei Kinzoku!")
     print("Kinzoku ist ein Kopfrechentrainer.")
     print("Wenn du startest bekommst du 10 zufällig ausgewählte Rechnungen mit den vier Grundrechenarten im Bereich von 1 - 1000.\n")
+    if easymode:
+        print("Der Easy Mode ist aktiviert, dir werden bei jeder Rechnung 5 Vorschläge gegeben von denen einer richtig ist")
     if input("Starten? (q für beenden): ")[:1].lower() == "q":
         sys.exit(0)
     count = 1
@@ -61,6 +76,8 @@ if __name__ == "__main__":
         clrscr()
         print(f"{count}. Rechnung:")
         calc = random.choice([gen_addition, gen_subtraction, gen_multiplication, gen_division])()
+        if easymode:
+            print(f"Vorschläge: {gen_recomms(calc[2])}")
         timer = time.time()
         res = input(f"{calc[0]} {calc[3]} {calc[1]}: ")
         while not res.isdigit():
