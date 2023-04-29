@@ -37,12 +37,11 @@ def gen_division() -> list:
 def gen_recomms(cor: int) -> str:
     ret = [cor]
     for i in range(4):
-        lower = cor - 100 if cor > 100 else 1
-        upper = cor + 100 if cor < 901 else 1000
         rand = random.randint(cor - 100 if cor > 100 else 1, cor + 100 if cor < 901 else 1000)
-        while rand == cor:
+        while rand in ret:
             rand = random.randint(cor - 100 if cor > 100 else 1, cor + 100 if cor < 901 else 1000)
         ret.append(rand)
+    random.shuffle(ret)
     return ret
 
 if __name__ == "__main__":
@@ -59,14 +58,11 @@ if __name__ == "__main__":
         while True:
             pass
     clrscr()
-    for i in range(5):
-        print(gen_recomms(485))
-    sys.exit(0)
     print("Willkommen bei Kinzoku!")
     print("Kinzoku ist ein Kopfrechentrainer.")
     print("Wenn du startest bekommst du 10 zufällig ausgewählte Rechnungen mit den vier Grundrechenarten im Bereich von 1 - 1000.\n")
     if easymode:
-        print("Der Easy Mode ist aktiviert, dir werden bei jeder Rechnung 5 Vorschläge gegeben von denen einer richtig ist")
+        print("Der Easy Mode ist aktiviert, dir werden bei jeder Rechnung 5 Vorschläge gegeben von denen einer richtig ist.")
     if input("Starten? (q für beenden): ")[:1].lower() == "q":
         sys.exit(0)
     count = 1
@@ -77,7 +73,7 @@ if __name__ == "__main__":
         print(f"{count}. Rechnung:")
         calc = random.choice([gen_addition, gen_subtraction, gen_multiplication, gen_division])()
         if easymode:
-            print(f"Vorschläge: {gen_recomms(calc[2])}")
+            print(f"Vorschläge: {' | '.join(str(i) for i in gen_recomms(calc[2]))}")
         timer = time.time()
         res = input(f"{calc[0]} {calc[3]} {calc[1]}: ")
         while not res.isdigit():
@@ -97,5 +93,5 @@ if __name__ == "__main__":
         count += 1
         if count == 11 and str(input("Beenden?: ")) + "x" or input("Nächste Rechnung? (q für beenden): ")[:1].lower() == "q":
             clrscr()
-            print(f"Du hast insgesamt {correct} / {count - 1} Rechnungen gelöst und dabei {total} / {(count - 1) * 3} Punkten erreicht.")
+            print(f"Du hast insgesamt {correct} / {count - 1} Rechnung{'en' if count - 1 != 1 else ''} gelöst und dabei {total} / {(count - 1) * 3} Punkten erreicht.")
             break
