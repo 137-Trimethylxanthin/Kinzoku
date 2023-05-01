@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+version:str = "1.0.0"
 import argparse
 import os
 import random
@@ -360,4 +361,21 @@ def game_cli():
 
 
 if __name__ == '__main__':
-    game_gui()
+    argparse = argparse.ArgumentParser()
+    argparse.add_argument("-g", "--gui", help="Startet das Spiel mit GUI", action="store_true")
+    argparse.add_argument("-c", "--cli", help="Startet das Spiel in der Konsole", action="store_true")
+    argparse.add_argument("-v", "--version", help="Zeigt die Version an", action="store_true")
+    args = argparse.parse_args()
+    if args.gui:
+        game_gui()
+    elif args.cli:
+        game_cli()
+    elif args.version:
+        print(f"Version: {version}")
+    else:
+        print("Bitte gib eine Option an")
+        print("Benutze -h oder --help für Hilfe")
+        print("oder starte das spiel mit -g oder -c")
+        print("siehe help für mehr informationen")
+
+
