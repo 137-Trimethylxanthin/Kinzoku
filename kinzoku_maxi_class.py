@@ -243,7 +243,7 @@ class GameFrame(tk.Frame):
         self.num1: int = 0
         self.num2: int = 0
         self.op: str = ""
-        self.window.geometry("1920x1080")
+        self.window.geometry("800x650")
         self.calc = tk.Frame(width=500, height=650, bg="#24273a")
         self.calc.pack_propagate(False)
 
@@ -288,6 +288,7 @@ class GameFrame(tk.Frame):
                 self.start_time = time.time()
                 self.done = False
                 if self.window.counter == 9:
+                    self.calc.destroy()
                     self.window.switch(EndFrame)
 
         self.columnconfigure(0, weight=1)
@@ -296,7 +297,7 @@ class GameFrame(tk.Frame):
         self.columnconfigure(3, weight=1)
         self.configure(bg="#24273a")
 
-        self.text = tk.Text(self.calc, font=("Arial", 32), width=45, height=2, bg="#181926", fg="#cad3f5", borderwidth=0,
+        self.text = tk.Text(self.calc, font=("Arial", 32), width=20, height=2, bg="#181926", fg="#cad3f5", borderwidth=0,
                             highlightthickness=5, insertbackground="#cad3f5", highlightbackground="#494d64", )
         self.text.grid(columnspan=3, pady=20)
         self.question = f"{self.num1} {self.op} {self.num2} = "
