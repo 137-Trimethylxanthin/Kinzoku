@@ -264,9 +264,9 @@ class GameFrame(tk.Frame):
                 self.text.insert(1.0, self.question + self.now_numbers)
             elif number == "enter" and not self.done and self.now_numbers != "":
                 if test_answer(self.num1, self.num2, self.op, int(self.now_numbers)):
-                    self.text.delete(1.0, "end")
-                    self.text.insert(1.0, "richtig")
-                    self.text.insert(2.0, f"\nzeit: {(time.time() - self.start_time).__round__(2)} s")
+                    self.text.delete(1.0, "End")
+                    self.text.insert(1.0, "Richtig")
+                    self.text.insert(2.0, f"\nZeit: {(time.time() - self.start_time).__round__(2)} s")
                     if (time.time() - self.start_time) < 10:
                         self.window.punkte += 3
                     elif (time.time() - self.start_time) < 20:
@@ -274,8 +274,8 @@ class GameFrame(tk.Frame):
                     else:
                         self.window.punkte += 1
                 else:
-                    self.text.delete(1.0, "end")
-                    self.text.insert(1.0, "falsch")
+                    self.text.delete(1.0, "End")
+                    self.text.insert(1.0, "Falsch")
                     self.text.insert(2.0,
                                      f"\nrichtig: {self.question}{int(eval(f'{self.num1} {self.op} {self.num2}'))}")
                 self.done = True
@@ -284,7 +284,7 @@ class GameFrame(tk.Frame):
                 self.window.counter += 1
                 self.counterlable.configure(text=f"")
                 new_question()
-                self.text.delete(1.0, "end")
+                self.text.delete(1.0, "End")
                 self.text.insert(1.0, self.question + self.now_numbers)
                 self.start_time = time.time()
                 self.done = False
