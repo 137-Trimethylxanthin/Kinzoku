@@ -57,20 +57,24 @@ def game_start():
     input()
 
 
-def get_division():
+def get_division(dificulty: int = 1):
     num1: int = random.randint(1, 1000)
     num2: int = random.randint(1, 1000)
-    while num1 % num2 != 0 or num1 < num2:
-        num1 = random.randint(1, 1000)
-        num2 = random.randint(1, 1000)
+    if dificulty == 2:
+        while num1 < num2:
+            num1 = random.randint(1, 10000)
+            num2 = random.randint(1, 10000)
+    else:
+        while num1 % num2 != 0 or num1 < num2:
+            num1 = random.randint(1, 1000)
+            num2 = random.randint(1, 1000)
     return num1, num2
 
 
-def get_multiplication():
+def get_multiplication(dificulty: int = 1):
     num1: int = random.randint(1, 1000)
     num2: int = random.randint(1, 1000)
-
-    while num1 * num2 > 2000:
+    while num1 * num2 > 2000 and not dificulty == 2:
         num1 = random.randint(1, 1000)
         num2 = random.randint(1, 1000)
 
@@ -88,30 +92,31 @@ def get_subtraction():
     return num1, num2
 
 
-def get_addition():
+def get_addition(dificulty: int = 1):
     num1: int = random.randint(1, 1000)
     num2: int = random.randint(1, 1000)
 
-    while num1 + num2 > 2000:
+    while num1 + num2 > 2000 and not dificulty == 2:
         num1 = random.randint(1, 1000)
         num2 = random.randint(1, 1000)
 
     return num1, num2
 
 
-def get_random_question():
+def get_random_question(dificulty: int = 1):
+    print("dificulty", dificulty)
     operator: str = random.choice(['+', '-', '*', '/'])
     num1: int = 0
     num2: int = 0
     match operator:
         case '+':
-            num1, num2 = get_addition()
+            num1, num2 = get_addition(dificulty)
         case '-':
             num1, num2 = get_subtraction()
         case '*':
-            num1, num2 = get_multiplication()
+            num1, num2 = get_multiplication(dificulty)
         case '/':
-            num1, num2 = get_division()
+            num1, num2 = get_division(dificulty)
 
     return num1, num2, operator
 
@@ -164,6 +169,13 @@ def end_game(punkte: int):
         print()
 
 
+def fake_awnser(awnser: int):
+    if awnser <= 100:
+        return random.randint(0, 100)
+    else:
+        return random.randint(awnser - 100, awnser + 100)
+
+
 def game_cli():
     game_start()
     questions: int = 10
@@ -209,10 +221,13 @@ class Gui(tk.Tk):
         self.geometry("1100x700")
         self.resizable(False, False)
         self.title("Mathe Spiel")
-        self.configure(bg="#24273a")
+        self.configure(bg=theme["Base"])
         self.punkte: int = 0
         self.counter: int = 1
         self.rounds: int = 10
+        self.mode = tk.IntVar()
+        self.choise = tk.IntVar()
+        self.startOfGame: float = 0
 
         self.switch(StartFrame)
 
@@ -227,19 +242,24 @@ class StartFrame(tk.Frame):
     def __init__(self, window):
         tk.Frame.__init__(self, window)
         self.window = window
-        print(self.window.sad)
+        self.window.mode.set(1)
 
         self.configure(bg="#24273a")
 
-        self.lable = tk.Label(self, text="Hallo, willkommen zu unseren Mathe Spiel", font=("Arial", 20), pady=20,
+        self.lable = tk.Label(self, text="Hallo, willkommen zu unseren Mathe Spiel", font=("Arial", 30, "bold"),
+                              pady=20,
                               bg="#24273a", fg="#cad3f5")
         self.lable.pack()
 
         self.lable = tk.Label(self,
                               text="Du hast 10 Fragen\nWenn du eine frage unter 10 sekunden beantwortest bekommst du 3 "
                                    "punkte\n unter 20 sekunden 2 punkte\nUnd alles länger als 20 sekunden 1 "
-                                   "punkt\nfalsch beantwortete frage bekommen 0 punkte",
-                              font=("Arial", 16), pady=100, bg="#24273a", fg="#cad3f5", )
+                                   "punkt\nfalsch beantwortete frage bekommen 0 punkte\n\nDer Normal mode hat limits: "
+                                   "ergebnisse nicht über 2000 und nur ganzzahlige divisionen\nDer Hard mode hat keine limits"
+                                   " wie hoch die ergebnisse sein können und Divisionen werden AB-GERUNDET\nEasy mode hat"
+                                   " die gleichen limits wie Normal mode aber hat 2-6 auswahlmöglichkeiten die ausgewehlt"
+                                   " werden können\nViel Spaß",
+                              font=("Arial", 16), pady=20, bg="#24273a", fg="#cad3f5", )
         self.lable.pack()
 
         self.button = tk.Button(self, text="Start", font=("Arial", 40, "bold"),
@@ -247,10 +267,24 @@ class StartFrame(tk.Frame):
                                 width=10,
                                 height=1, bg="#a6da95", fg="#181926", borderwidth=0, activebackground="#8bd5ca",
                                 activeforeground="#181926", cursor="hand2")
-        self.button.pack()
+        self.button.pack(pady=20)
 
-    def egal(self):
-        print(self.window.sad)
+        self.easyMode = tk.Radiobutton(self, text="Easy Mode", font=("Arial", 30, "bold"), variable=self.window.mode,
+                                       value=0, bg="#24273a",
+                                       fg="#cad3f5", selectcolor="#24273a", activebackground="#24273a",
+                                       activeforeground=theme["Overlay0"], cursor="hand2")
+        self.easyMode.pack(side="left", padx=50, )
+
+        self.normalMode = tk.Radiobutton(self, text="Normal Mode", font=("Arial", 30, "bold"),
+                                         variable=self.window.mode, value=1, bg="#24273a",
+                                         fg="#cad3f5", selectcolor="#24273a", activebackground="#24273a",
+                                         activeforeground=theme["Overlay0"], cursor="hand2")
+        self.normalMode.pack(side="left", padx=50)
+
+        self.hardMode = tk.Radiobutton(self, text="Hard Mode", font=("Arial", 30, "bold"), variable=self.window.mode,
+                                       value=2, bg="#24273a", fg="#cad3f5", selectcolor="#24273a",
+                                       activebackground="#24273a", activeforeground=theme["Overlay0"], cursor="hand2")
+        self.hardMode.pack(side="left", padx=50)
 
 
 class GameFrame(tk.Frame):
@@ -263,6 +297,8 @@ class GameFrame(tk.Frame):
         self.done: bool = False
         self.num1: int = 0
         self.num2: int = 0
+        self.awnsers: list[int] = [0, 0, 0, 0, 0, 0]
+        self.window.choise.set(0)
         self.op: str = ""
         self.timeRemaining: str = ""
         self.timer = self.after(100, self.update_timer)
@@ -282,18 +318,33 @@ class GameFrame(tk.Frame):
 
         self.new_question()
 
-        self.CounterLabel = tk.Label(self.infoL, text=f"Frage: {self.window.counter}/{self.window.rounds}", font=("Arial", 32), width=20,
-                                     height=2, bg=theme["Base"], fg=theme["Text"], pady=50)
+        self.CounterLabel = tk.Label(self.infoL, text=f"Frage: {self.window.counter}/{self.window.rounds}",
+                                     font=("Arial", 32), width=20,
+                                     height=2, bg=theme["Base"], fg=theme["Text"], pady=150)
         self.CounterLabel.pack()
 
-        self.punkteLabel = tk.Label(self.infoL, text=f"Punkte: {self.window.punkte}/{(self.window.counter - 1)* 3}", font=("Arial", 32), width=20,
+        self.punkteLabel = tk.Label(self.infoL, text=f"Punkte: {self.window.punkte}/{(self.window.counter - 1) * 3}",
+                                    font=("Arial", 32), width=20,
                                     height=2, bg=theme["Base"], fg=theme["Text"], pady=25)
         self.punkteLabel.pack()
 
-        self.timeLabel = tk.Label(self.infoR, text=f"{(time.time() - self.start_time).__ceil__()} s/{self.timeRemaining}s", font=("Arial", 32),
+        self.timeLabel = tk.Label(self.infoR,
+                                  text=f"{(time.time() - self.start_time).__ceil__()} s/{self.timeRemaining}s",
+                                  font=("Arial", 32),
                                   width=20,
-                                  height=2, bg=theme["Base"], fg=theme["Text"], pady=50)
+                                  height=2, bg=theme["Base"], fg=theme["Text"], pady=150)
         self.timeLabel.pack()
+
+        if self.window.mode.get() == 2:
+            mode = "Hard"
+        elif self.window.mode.get() == 1:
+            mode = "Normal"
+        else:
+            mode = "Easy"
+
+        self.modeLabel = tk.Label(self.infoR, text=f"{mode}\nmode", font=("Arial", 32), wraplength=150, width=20,
+                                  height=2, bg=theme["Base"], fg=theme["Text"], pady=25, )
+        self.modeLabel.pack()
 
         # calculator
 
@@ -309,66 +360,126 @@ class GameFrame(tk.Frame):
         self.question = f"{self.num1} {self.op} {self.num2} = "
         self.text.configure(text=self.question)
 
-        self.btn7 = tk.Button(self.calc, text="7", font=("Arial", 30), height=2, command=lambda: self.button_click(7),
-                              bg=theme["Overlay0"], fg=theme["Text"], borderwidth=2, relief="groove",
-                              activebackground=theme["Overlay2"])
-        self.btn7.bind("<KeyPress>", lambda event: self.event(event))
-        self.btn7.grid(row=1, column=0, sticky="nsew", pady=2, padx=4)
+        if self.window.mode.get() == 0:
+            self.choise0 = tk.Radiobutton(self.calc, text=f"{self.awnsers[0]}", font=("Arial", 30, "bold"),
+                                          variable=self.window.choise,
+                                          value=0, bg="#24273a", fg="#cad3f5", selectcolor="#24273a",
+                                          activebackground="#24273a", activeforeground=theme["Overlay0"],
+                                          cursor="hand2")
+            self.choise0.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
 
-        self.btn8 = tk.Button(self.calc, text="8", font=("Arial", 30), height=2, command=lambda: self.button_click(8),
-                              bg=theme["Overlay0"], fg=theme["Text"], borderwidth=2, relief="groove",
-                              activebackground=theme["Overlay2"])
-        self.btn8.grid(row=1, column=1, sticky="nsew", pady=2, padx=4)
+            self.choise1 = tk.Radiobutton(self.calc, text=f"{self.awnsers[1]}", font=("Arial", 30, "bold"),
+                                          variable=self.window.choise,
+                                          value=1, bg="#24273a", fg="#cad3f5", selectcolor="#24273a",
+                                          activebackground="#24273a", activeforeground=theme["Overlay0"],
+                                          cursor="hand2")
+            self.choise1.grid(row=1, column=1, sticky="nsew", padx=10, pady=10)
 
-        self.btn9 = tk.Button(self.calc, text="9", font=("Arial", 30), height=2, command=lambda: self.button_click(9),
-                              bg=theme["Overlay0"], fg=theme["Text"], borderwidth=2, relief="groove",
-                              activebackground=theme["Overlay2"])
-        self.btn9.grid(row=1, column=2, sticky="nsew", pady=2, padx=4)
+            self.choise2 = tk.Radiobutton(self.calc, text=f"{self.awnsers[2]}", font=("Arial", 30, "bold"),
+                                          variable=self.window.choise,
+                                          value=2, bg="#24273a", fg="#cad3f5", selectcolor="#24273a",
+                                          activebackground="#24273a", activeforeground=theme["Overlay0"],
+                                          cursor="hand2")
+            self.choise2.grid(row=1, column=2, sticky="nsew", padx=10, pady=10)
 
-        self.btn4 = tk.Button(self.calc, text="4", font=("Arial", 30), height=2, command=lambda: self.button_click(4),
-                              bg=theme["Overlay0"], fg=theme["Text"], borderwidth=2, relief="groove",
-                              activebackground=theme["Overlay2"])
-        self.btn4.grid(row=2, column=0, sticky="nsew", pady=2, padx=4)
+            self.choise3 = tk.Radiobutton(self.calc, text=f"{self.awnsers[3]}", font=("Arial", 30, "bold"),
+                                          variable=self.window.choise,
+                                          value=3, bg="#24273a", fg="#cad3f5", selectcolor="#24273a",
+                                          activebackground="#24273a", activeforeground=theme["Overlay0"],
+                                          cursor="hand2")
+            self.choise3.grid(row=2, column=0, sticky="nsew", padx=10, pady=10)
 
-        self.btn5 = tk.Button(self.calc, text="5", font=("Arial", 30), height=2, command=lambda: self.button_click(5),
-                              bg=theme["Overlay0"], fg=theme["Text"], borderwidth=2, relief="groove",
-                              activebackground=theme["Overlay2"])
-        self.btn5.grid(row=2, column=1, sticky="nsew", pady=2, padx=4)
+            self.choise4 = tk.Radiobutton(self.calc, text=f"{self.awnsers[4]}", font=("Arial", 30, "bold"),
+                                          variable=self.window.choise,
+                                          value=4, bg="#24273a", fg="#cad3f5", selectcolor="#24273a",
+                                          activebackground="#24273a", activeforeground=theme["Overlay0"],
+                                          cursor="hand2")
+            self.choise4.grid(row=2, column=1, sticky="nsew", padx=10, pady=10)
 
-        self.btn6 = tk.Button(self.calc, text="6", font=("Arial", 30), height=2, command=lambda: self.button_click(6),
-                              bg=theme["Overlay0"], fg=theme["Text"], borderwidth=2, relief="groove",
-                              activebackground=theme["Overlay2"])
-        self.btn6.grid(row=2, column=2, sticky="nsew", pady=2, padx=4)
+            self.choise5 = tk.Radiobutton(self.calc, text=f"{self.awnsers[5]}", font=("Arial", 30, "bold"),
+                                          variable=self.window.choise,
+                                          value=5, bg="#24273a", fg="#cad3f5", selectcolor="#24273a",
+                                          activebackground="#24273a", activeforeground=theme["Overlay0"],
+                                          cursor="hand2")
+            self.choise5.grid(row=2, column=2, sticky="nsew", padx=10, pady=10)
 
-        self.btn1 = tk.Button(self.calc, text="1", font=("Arial", 30), height=2, command=lambda: self.button_click(1),
-                              bg=theme["Overlay0"], fg=theme["Text"], borderwidth=2, relief="groove",
-                              activebackground=theme["Overlay2"])
-        self.btn1.grid(row=3, column=0, sticky="nsew", pady=2, padx=4)
+            self.confirm = tk.Button(self.calc, text="Confirm", font=("Arial", 30), height=2,
+                                     command=lambda: self.button_click("enter"),
+                                     bg=theme["Overlay0"], fg=theme["Text"], borderwidth=2, relief="groove",
+                                     activebackground=theme["Overlay2"])
+            self.confirm.grid(row=3, column=0, sticky="nsew", pady=2, padx=4, columnspan=3)
+        else:
 
-        self.btn2 = tk.Button(self.calc, text="2", font=("Arial", 30), height=2, command=lambda: self.button_click(2),
-                              bg=theme["Overlay0"], fg=theme["Text"], borderwidth=2, relief="groove",
-                              activebackground=theme["Overlay2"])
-        self.btn2.grid(row=3, column=1, sticky="nsew", pady=2, padx=4)
+            self.btn7 = tk.Button(self.calc, text="7", font=("Arial", 30), height=2,
+                                  command=lambda: self.button_click(7),
+                                  bg=theme["Overlay0"], fg=theme["Text"], borderwidth=2, relief="groove",
+                                  activebackground=theme["Overlay2"])
+            self.btn7.grid(row=1, column=0, sticky="nsew", pady=2, padx=4)
 
-        self.btn3 = tk.Button(self.calc, text="3", font=("Arial", 30), height=2, command=lambda: self.button_click(3),
-                              bg=theme["Overlay0"], fg=theme["Text"], borderwidth=2, relief="groove",
-                              activebackground=theme["Overlay2"])
-        self.btn3.grid(row=3, column=2, sticky="nsew", pady=2, padx=4)
+            self.btn8 = tk.Button(self.calc, text="8", font=("Arial", 30), height=2,
+                                  command=lambda: self.button_click(8),
+                                  bg=theme["Overlay0"], fg=theme["Text"], borderwidth=2, relief="groove",
+                                  activebackground=theme["Overlay2"])
+            self.btn8.grid(row=1, column=1, sticky="nsew", pady=2, padx=4)
 
-        self.btn0 = tk.Button(self.calc, text="0", font=("Arial", 30), height=2, command=lambda: self.button_click(0),
-                              bg=theme["Overlay0"], fg=theme["Text"], borderwidth=2, relief="groove",
-                              activebackground=theme["Overlay2"])
-        self.btn0.grid(row=4, column=1, sticky="nsew", pady=2, padx=4)
+            self.btn9 = tk.Button(self.calc, text="9", font=("Arial", 30), height=2,
+                                  command=lambda: self.button_click(9),
+                                  bg=theme["Overlay0"], fg=theme["Text"], borderwidth=2, relief="groove",
+                                  activebackground=theme["Overlay2"])
+            self.btn9.grid(row=1, column=2, sticky="nsew", pady=2, padx=4)
 
-        self.btn_del = tk.Button(self.calc, text="C", font=("Arial", 30), height=2,
-                                 command=lambda: self.button_click("del"), bg=theme["Overlay0"], fg=theme["Text"],
-                                 borderwidth=2, relief="groove", activebackground=theme["Overlay2"])
-        self.btn_del.grid(row=4, column=0, sticky="nsew", pady=2, padx=4)
+            self.btn4 = tk.Button(self.calc, text="4", font=("Arial", 30), height=2,
+                                  command=lambda: self.button_click(4),
+                                  bg=theme["Overlay0"], fg=theme["Text"], borderwidth=2, relief="groove",
+                                  activebackground=theme["Overlay2"])
+            self.btn4.grid(row=2, column=0, sticky="nsew", pady=2, padx=4)
 
-        self.btn_enter = tk.Button(self.calc, text="=", font=("Arial", 30), height=2,
-                                   command=lambda: self.button_click("enter"), bg=theme["Overlay0"], fg=theme["Text"],
-                                   borderwidth=2, relief="groove", activebackground=theme["Overlay2"])
-        self.btn_enter.grid(row=4, column=2, sticky="nsew", pady=2, padx=4)
+            self.btn5 = tk.Button(self.calc, text="5", font=("Arial", 30), height=2,
+                                  command=lambda: self.button_click(5),
+                                  bg=theme["Overlay0"], fg=theme["Text"], borderwidth=2, relief="groove",
+                                  activebackground=theme["Overlay2"])
+            self.btn5.grid(row=2, column=1, sticky="nsew", pady=2, padx=4)
+
+            self.btn6 = tk.Button(self.calc, text="6", font=("Arial", 30), height=2,
+                                  command=lambda: self.button_click(6),
+                                  bg=theme["Overlay0"], fg=theme["Text"], borderwidth=2, relief="groove",
+                                  activebackground=theme["Overlay2"])
+            self.btn6.grid(row=2, column=2, sticky="nsew", pady=2, padx=4)
+
+            self.btn1 = tk.Button(self.calc, text="1", font=("Arial", 30), height=2,
+                                  command=lambda: self.button_click(1),
+                                  bg=theme["Overlay0"], fg=theme["Text"], borderwidth=2, relief="groove",
+                                  activebackground=theme["Overlay2"])
+            self.btn1.grid(row=3, column=0, sticky="nsew", pady=2, padx=4)
+
+            self.btn2 = tk.Button(self.calc, text="2", font=("Arial", 30), height=2,
+                                  command=lambda: self.button_click(2),
+                                  bg=theme["Overlay0"], fg=theme["Text"], borderwidth=2, relief="groove",
+                                  activebackground=theme["Overlay2"])
+            self.btn2.grid(row=3, column=1, sticky="nsew", pady=2, padx=4)
+
+            self.btn3 = tk.Button(self.calc, text="3", font=("Arial", 30), height=2,
+                                  command=lambda: self.button_click(3),
+                                  bg=theme["Overlay0"], fg=theme["Text"], borderwidth=2, relief="groove",
+                                  activebackground=theme["Overlay2"])
+            self.btn3.grid(row=3, column=2, sticky="nsew", pady=2, padx=4)
+
+            self.btn0 = tk.Button(self.calc, text="0", font=("Arial", 30), height=2,
+                                  command=lambda: self.button_click(0),
+                                  bg=theme["Overlay0"], fg=theme["Text"], borderwidth=2, relief="groove",
+                                  activebackground=theme["Overlay2"])
+            self.btn0.grid(row=4, column=1, sticky="nsew", pady=2, padx=4)
+
+            self.btn_del = tk.Button(self.calc, text="C", font=("Arial", 30), height=2,
+                                     command=lambda: self.button_click("del"), bg=theme["Overlay0"], fg=theme["Text"],
+                                     borderwidth=2, relief="groove", activebackground=theme["Overlay2"])
+            self.btn_del.grid(row=4, column=0, sticky="nsew", pady=2, padx=4)
+
+            self.btn_enter = tk.Button(self.calc, text="=", font=("Arial", 30), height=2,
+                                       command=lambda: self.button_click("enter"), bg=theme["Overlay0"],
+                                       fg=theme["Text"],
+                                       borderwidth=2, relief="groove", activebackground=theme["Overlay2"])
+            self.btn_enter.grid(row=4, column=2, sticky="nsew", pady=2, padx=4)
 
         self.infoL.pack()
         self.calc.pack()
@@ -376,11 +487,11 @@ class GameFrame(tk.Frame):
 
     def key_press(self, event):
         key = event.char
-        if key in "1234567890":
+        if key in "1234567890" and not self.window.mode.get() == 0:
             self.button_click(int(key))
         elif key == "\r":
             self.button_click("enter")
-        elif key == "\x08":
+        elif key == "\x08" and not self.window.mode.get() == 0:
             self.button_click("del")
 
     def update_timer(self):
@@ -395,10 +506,25 @@ class GameFrame(tk.Frame):
         self.timer = self.after(100, self.update_timer)
 
     def new_question(self):
-        self.num1, self.num2, self.op = get_random_question()
+        self.num1, self.num2, self.op = get_random_question(self.window.mode.get())
         self.question = f"{self.num1} {self.op} {self.num2} = "
 
+        if self.window.mode.get() == 0:
+            self.awnsers[0] = int(eval(self.question[:-2]))
+            for i in range(1, 6):
+                self.awnsers[i] = fake_awnser(self.awnsers[0])
+            # if self.window.punkte < 5:
+            #    self.awnsers[1] = fake_awnser(self.awnsers[0])
+            # else:
+            #    for i in range(self.window.punkte % 5):
+            #        self.awnsers[i + 1] = fake_awnser(self.awnsers[0])
+            random.shuffle(self.awnsers)
+
     def button_click(self, number):
+
+        if self.window.mode.get() == 0:
+            self.now_numbers = str(self.awnsers[self.window.choise.get()])
+
         if number != "del" and number != "enter" and not self.done:
             self.now_numbers += str(number)
             self.text.configure(text=self.question + self.now_numbers)
@@ -421,11 +547,27 @@ class GameFrame(tk.Frame):
                 self.text.configure(
                     text=f"Falsch\nrichtig: {self.question}{int(eval(f'{self.num1} {self.op} {self.num2}')).__round__(2)}")
             self.done = True
-            self.punkteLabel.configure(text=f"Punkte: {self.window.punkte}/{(self.window.counter-1) * 3}")
+            self.punkteLabel.configure(text=f"Punkte: {self.window.punkte}/{(self.window.counter - 1) * 3}")
+            self.window.startOfGame += (time.time() - self.start_time).__round__(2)
+            if self.window.mode.get() == 0:
+                self.choise0.configure(text="")
+                self.choise1.configure(text="")
+                self.choise2.configure(text="")
+                self.choise3.configure(text="")
+                self.choise4.configure(text="")
+                self.choise5.configure(text="")
         elif number == "enter" and self.done:
             self.now_numbers = ""
             self.CounterLabel.configure(text=f"Frage: {self.window.counter}/{self.window.rounds}")
             self.new_question()
+            if self.window.mode.get() == 0:
+                self.choise0.configure(text=self.awnsers[0])
+                self.choise1.configure(text=self.awnsers[1])
+                self.choise2.configure(text=self.awnsers[2])
+                self.choise3.configure(text=self.awnsers[3])
+                self.choise4.configure(text=self.awnsers[4])
+                self.choise5.configure(text=self.awnsers[5])
+
             self.text.configure(text=self.question)
             self.start_time = time.time()
             self.timer = self.after(100, self.update_timer)
@@ -441,23 +583,37 @@ class EndFrame(tk.Frame):
     def __init__(self, window):
         tk.Frame.__init__(self, window)
         self.window = window
+        self.window.title("Ende")
+        self.configure(bg=theme["Base"], padx=10, pady=10)
 
-        def restart():
-            self.window.punkte = 0
-            self.window.counter = 0
-            self.window.switch(GameFrame)
+        if self.window.mode.get() == 2:
+            mode = "Hard"
+        elif self.window.mode.get() == 1:
+            mode = "Normal"
+        else:
+            mode = "Easy"
 
-        self.lable = tk.Label(self, text=f"Ende\nDu hast {self.window.punkte} punkte erhalten", font=("Arial", 30),
-                              bg="#24273a", fg="#cad3f5")
-        self.lable.grid(row=0, column=0, columnspan=4, sticky="nsew", pady=2, padx=4)
+        self.lable = tk.Label(self, text=f"Vorbei\nDu hast auf {mode}-mode {self.window.punkte}"
+                                         f" punkte erhalten\nDu hast dafür nur{self.window.startOfGame}",
+                              font=("Arial", 30),
+                              bg="#24273a", fg="#cad3f5", borderwidth=2, relief="groove", padx=10, pady=10, height=3,
+                              width=40, anchor="center", justify="center")
+        self.lable.grid(row=0, column=0, columnspan=4, sticky="nsew", pady=200, padx=4)
 
-        self.button = tk.Button(self, text="Neues Spiel", font=("Arial", 30), height=2, command=lambda: restart(),
-                                bg="#24273a", fg="#cad3f5")
+        self.button = tk.Button(self, text="Neues Spiel", font=("Arial", 30), height=2, command=lambda: self.restart(),
+                                bg=theme["Base"], fg=theme["Text"], borderwidth=2, relief="groove",
+                                activebackground=theme["Overlay2"])
         self.button.grid(row=2, column=0, columnspan=2, sticky="nsew", pady=2, padx=8)
 
         self.button = tk.Button(self, text="Beenden", font=("Arial", 30), height=2,
-                                command=lambda: self.window.destroy(), bg="#24273a", fg="#cad3f5")
+                                command=lambda: self.window.destroy(), bg=theme["Base"], fg=theme["Text"],
+                                borderwidth=2, relief="groove", activebackground=theme["Overlay2"])
         self.button.grid(row=2, column=2, columnspan=2, sticky="nsew", pady=2, padx=8)
+
+    def restart(self):
+        self.window.punkte = 0
+        self.window.counter = 1
+        self.window.switch(StartFrame)
 
 
 if __name__ == '__main__':
