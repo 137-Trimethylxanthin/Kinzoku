@@ -243,8 +243,8 @@ class GameFrame(tk.Frame):
         self.num1: int = 0
         self.num2: int = 0
         self.op: str = ""
+        self.timer = self.after(100, self.update_timer)
         self.window.geometry("900x650")
-
 
         self.infoL = tk.Frame(width=200, height=650, bg="#24273a")
         self.infoL.pack_propagate(False)
@@ -258,121 +258,121 @@ class GameFrame(tk.Frame):
         self.infoR.pack_propagate(False)
         self.infoR.pack(side="right")
 
+        self.new_question()
 
-
-        def new_question():
-            self.num1, self.num2, self.op = get_random_question()
-            self.question = f"{self.num1} {self.op} {self.num2} = "
-
-        new_question()
-
-        def button_click(number):
-            if number != "del" and number != "enter" and not self.done:
-                self.now_numbers += str(number)
-                self.text.delete(1.0, "end")
-                self.text.insert(1.0, self.question + self.now_numbers)
-            elif number == "del" and not self.done:
-                self.now_numbers = self.now_numbers[:-1]
-                self.text.delete(1.0, "end")
-                self.text.insert(1.0, self.question + self.now_numbers)
-            elif number == "enter" and not self.done and self.now_numbers != "":
-                if test_answer(self.num1, self.num2, self.op, int(self.now_numbers)):
-                    self.text.delete(1.0, "end")
-                    self.text.insert(1.0, "Richtig")
-                    self.text.insert(2.0, f"\nZeit: {(time.time() - self.start_time).__round__(2)} s")
-                    if (time.time() - self.start_time) < 10:
-                        self.window.punkte += 3
-                    elif (time.time() - self.start_time) < 20:
-                        self.window.punkte += 2
-                    else:
-                        self.window.punkte += 1
-                else:
-                    self.text.delete(1.0, "end")
-                    self.text.insert(1.0, "Falsch")
-                    self.text.insert(2.0,
-                                     f"\nrichtig: {self.question}{int(eval(f'{self.num1} {self.op} {self.num2}'))}")
-                self.done = True
-            elif number == "enter" and self.done:
-                self.now_numbers = ""
-                self.window.counter += 1
-                self.counterlable.configure(text=f"Frage: {self.window.counter}")
-                new_question()
-                self.text.delete(1.0, "end")
-                self.text.insert(1.0, self.question + self.now_numbers)
-                self.start_time = time.time()
-                self.done = False
-                if self.window.counter == 9:
-                    self.calc.destroy()
-                    self.window.switch(EndFrame)
-
-
-        #infos
-
-        self.counterlable = tk.Label(self.infoL, text=f"Frage: {self.window.counter}",font=("Arial", 32), width=20, height=2, bg="#181926", fg="#cad3f5")
-        self.counterlable.pack()
-
-        self.counterlable2 = tk.Label(self.infoR, text=f"Frage: {self.window.counter}", font=("Arial", 32), width=20,
+        self.CounterLabel = tk.Label(self.infoL, text=f"Frage: {self.window.counter}", font=("Arial", 32), width=20,
                                      height=2, bg="#181926", fg="#cad3f5")
-        self.counterlable2.pack()
+        self.CounterLabel.pack()
 
+        self.timeLabel = tk.Label(self.infoR, text=f"Time: {time.time() - self.start_time} s", font=("Arial", 32),
+                                  width=20,
+                                  height=2, bg="#181926", fg="#cad3f5")
+        self.timeLabel.pack()
 
-
-        #calculator
+        # calculator
 
         self.calc.columnconfigure(0, weight=1)
         self.calc.columnconfigure(1, weight=1)
         self.calc.columnconfigure(2, weight=1)
         self.calc.columnconfigure(3, weight=1)
 
-
-        #text uses whole frame as its with length
-        self.text = tk.Text(self.calc, font=("Arial", 32),width=20, height=2, bg="#181926", fg="#cad3f5", borderwidth=0,
+        # text uses whole frame as its with length
+        self.text = tk.Text(self.calc, font=("Arial", 32), width=20, height=2, bg="#181926", fg="#cad3f5",
+                            borderwidth=0,
                             highlightthickness=5, insertbackground="#cad3f5", highlightbackground="#494d64", )
         self.text.grid(columnspan=3, pady=20, sticky="nsew", padx=4)
         self.question = f"{self.num1} {self.op} {self.num2} = "
         self.text.delete(1.0, "end")
         self.text.insert(1.0, self.question)
 
-        self.btn7 = tk.Button(self.calc, text="7", font=("Arial", 30), height=2, command=lambda: button_click(7))
+        self.btn7 = tk.Button(self.calc, text="7", font=("Arial", 30), height=2, command=lambda: self.button_click(7))
         self.btn7.grid(row=1, column=0, sticky="nsew", pady=2, padx=4)
 
-        self.btn8 = tk.Button(self.calc, text="8", font=("Arial", 30), height=2, command=lambda: button_click(8))
+        self.btn8 = tk.Button(self.calc, text="8", font=("Arial", 30), height=2, command=lambda: self.button_click(8))
         self.btn8.grid(row=1, column=1, sticky="nsew", pady=2, padx=4)
 
-        self.btn9 = tk.Button(self.calc, text="9", font=("Arial", 30), height=2, command=lambda: button_click(9))
+        self.btn9 = tk.Button(self.calc, text="9", font=("Arial", 30), height=2, command=lambda: self.button_click(9))
         self.btn9.grid(row=1, column=2, sticky="nsew", pady=2, padx=4)
 
-        self.btn4 = tk.Button(self.calc, text="4", font=("Arial", 30), height=2, command=lambda: button_click(4))
+        self.btn4 = tk.Button(self.calc, text="4", font=("Arial", 30), height=2, command=lambda: self.button_click(4))
         self.btn4.grid(row=2, column=0, sticky="nsew", pady=2, padx=4)
 
-        self.btn5 = tk.Button(self.calc, text="5", font=("Arial", 30), height=2, command=lambda: button_click(5))
+        self.btn5 = tk.Button(self.calc, text="5", font=("Arial", 30), height=2, command=lambda: self.button_click(5))
         self.btn5.grid(row=2, column=1, sticky="nsew", pady=2, padx=4)
 
-        self.btn6 = tk.Button(self.calc, text="6", font=("Arial", 30), height=2, command=lambda: button_click(6))
+        self.btn6 = tk.Button(self.calc, text="6", font=("Arial", 30), height=2, command=lambda: self.button_click(6))
         self.btn6.grid(row=2, column=2, sticky="nsew", pady=2, padx=4)
 
-        self.btn1 = tk.Button(self.calc, text="1", font=("Arial", 30), height=2, command=lambda: button_click(1))
+        self.btn1 = tk.Button(self.calc, text="1", font=("Arial", 30), height=2, command=lambda: self.button_click(1))
         self.btn1.grid(row=3, column=0, sticky="nsew", pady=2, padx=4)
 
-        self.btn2 = tk.Button(self.calc, text="2", font=("Arial", 30), height=2, command=lambda: button_click(2))
+        self.btn2 = tk.Button(self.calc, text="2", font=("Arial", 30), height=2, command=lambda: self.button_click(2))
         self.btn2.grid(row=3, column=1, sticky="nsew", pady=2, padx=4)
 
-        self.btn3 = tk.Button(self.calc, text="3", font=("Arial", 30), height=2, command=lambda: button_click(3))
+        self.btn3 = tk.Button(self.calc, text="3", font=("Arial", 30), height=2, command=lambda: self.button_click(3))
         self.btn3.grid(row=3, column=2, sticky="nsew", pady=2, padx=4)
 
-        self.btn0 = tk.Button(self.calc, text="0", font=("Arial", 30), height=2, command=lambda: button_click(0))
+        self.btn0 = tk.Button(self.calc, text="0", font=("Arial", 30), height=2, command=lambda: self.button_click(0))
         self.btn0.grid(row=4, column=1, sticky="nsew", pady=2, padx=4)
 
-        self.btn_del = tk.Button(self.calc, text="C", font=("Arial", 30), height=2, command=lambda: button_click("del"))
+        self.btn_del = tk.Button(self.calc, text="C", font=("Arial", 30), height=2, command=lambda: self.button_click("del"))
         self.btn_del.grid(row=4, column=0, sticky="nsew", pady=2, padx=4)
 
-        self.btn_enter = tk.Button(self.calc, text="=", font=("Arial", 30), height=2, command=lambda: button_click("enter"))
+        self.btn_enter = tk.Button(self.calc, text="=", font=("Arial", 30), height=2,
+                                   command=lambda: self.button_click("enter"))
         self.btn_enter.grid(row=4, column=2, sticky="nsew", pady=2, padx=4)
-
 
         self.infoL.pack()
         self.calc.pack()
         self.infoR.pack()
+
+    def update_timer(self):
+        self.timeLabel.configure(text=f"Time: {time.time() - self.start_time} s")
+        print("update timer")
+
+    def new_question(self):
+        self.num1, self.num2, self.op = get_random_question()
+        self.question = f"{self.num1} {self.op} {self.num2} = "
+
+    def button_click(self, number):
+        if number != "del" and number != "enter" and not self.done:
+            self.now_numbers += str(number)
+            self.text.delete(1.0, "end")
+            self.text.insert(1.0, self.question + self.now_numbers)
+        elif number == "del" and not self.done:
+            self.now_numbers = self.now_numbers[:-1]
+            self.text.delete(1.0, "end")
+            self.text.insert(1.0, self.question + self.now_numbers)
+        elif number == "enter" and not self.done and self.now_numbers != "":
+            if test_answer(self.num1, self.num2, self.op, int(self.now_numbers)):
+                self.text.delete(1.0, "end")
+                self.text.insert(1.0, "Richtig")
+                self.text.insert(2.0, f"\nZeit: {(time.time() - self.start_time).__round__(2)} s")
+                if (time.time() - self.start_time) < 10:
+                    self.window.punkte += 3
+                elif (time.time() - self.start_time) < 20:
+                    self.window.punkte += 2
+                else:
+                    self.window.punkte += 1
+            else:
+                self.text.delete(1.0, "end")
+                self.text.insert(1.0, "Falsch")
+                self.text.insert(2.0,
+                                 f"\nrichtig: {self.question}{int(eval(f'{self.num1} {self.op} {self.num2}'))}")
+            self.done = True
+        elif number == "enter" and self.done:
+            self.now_numbers = ""
+            self.window.counter += 1
+            self.CounterLabel.configure(text=f"Frage: {self.window.counter}")
+            self.new_question()
+            self.text.delete(1.0, "end")
+            self.text.insert(1.0, self.question + self.now_numbers)
+            self.start_time = time.time()
+            self.done = False
+            if self.window.counter == 9:
+                self.calc.destroy()
+                self.window.switch(EndFrame)
+
 
 
 class EndFrame(tk.Frame):
@@ -385,13 +385,16 @@ class EndFrame(tk.Frame):
             self.window.counter = 0
             self.window.switch(GameFrame)
 
-        self.lable = tk.Label(self, text=f"Ende\nDu hast {self.window.punkte} punkte erhalten", font=("Arial", 30), bg="#24273a", fg="#cad3f5")
+        self.lable = tk.Label(self, text=f"Ende\nDu hast {self.window.punkte} punkte erhalten", font=("Arial", 30),
+                              bg="#24273a", fg="#cad3f5")
         self.lable.grid(row=0, column=0, columnspan=4, sticky="nsew", pady=2, padx=4)
 
-        self.button = tk.Button(self, text="Neues Spiel", font=("Arial", 30), height=2, command=lambda: restart(), bg="#24273a", fg="#cad3f5")
+        self.button = tk.Button(self, text="Neues Spiel", font=("Arial", 30), height=2, command=lambda: restart(),
+                                bg="#24273a", fg="#cad3f5")
         self.button.grid(row=2, column=0, columnspan=2, sticky="nsew", pady=2, padx=8)
 
-        self.button = tk.Button(self, text="Beenden", font=("Arial", 30), height=2, command=lambda: self.window.destroy(), bg="#24273a", fg="#cad3f5")
+        self.button = tk.Button(self, text="Beenden", font=("Arial", 30), height=2,
+                                command=lambda: self.window.destroy(), bg="#24273a", fg="#cad3f5")
         self.button.grid(row=2, column=2, columnspan=2, sticky="nsew", pady=2, padx=8)
 
 
