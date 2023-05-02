@@ -243,7 +243,9 @@ class GameFrame(tk.Frame):
         self.num1: int = 0
         self.num2: int = 0
         self.op: str = ""
-        self.window.geometry("500x650")
+        self.window.geometry("1920x1080")
+        self.calc = tk.Frame(width=500, height=650, bg="#24273a")
+        self.calc.pack_propagate(False)
 
         def new_question():
             self.num1, self.num2, self.op = get_random_question()
@@ -294,49 +296,50 @@ class GameFrame(tk.Frame):
         self.columnconfigure(3, weight=1)
         self.configure(bg="#24273a")
 
-        self.text = tk.Text(self, font=("Arial", 32), width=45, height=2, bg="#181926", fg="#cad3f5", borderwidth=0,
+        self.text = tk.Text(self.calc, font=("Arial", 32), width=45, height=2, bg="#181926", fg="#cad3f5", borderwidth=0,
                             highlightthickness=5, insertbackground="#cad3f5", highlightbackground="#494d64", )
         self.text.grid(columnspan=3, pady=20)
         self.question = f"{self.num1} {self.op} {self.num2} = "
         self.text.delete(1.0, "end")
         self.text.insert(1.0, self.question)
 
-        self.btn7 = tk.Button(self, text="7", font=("Arial", 30), height=2, command=lambda: button_click(7))
+        self.btn7 = tk.Button(self.calc, text="7", font=("Arial", 30), height=2, command=lambda: button_click(7))
         self.btn7.grid(row=1, column=0, sticky="nsew", pady=2, padx=4)
 
-        self.btn8 = tk.Button(self, text="8", font=("Arial", 30), height=2, command=lambda: button_click(8))
+        self.btn8 = tk.Button(self.calc, text="8", font=("Arial", 30), height=2, command=lambda: button_click(8))
         self.btn8.grid(row=1, column=1, sticky="nsew", pady=2, padx=4)
 
-        self.btn9 = tk.Button(self, text="9", font=("Arial", 30), height=2, command=lambda: button_click(9))
+        self.btn9 = tk.Button(self.calc, text="9", font=("Arial", 30), height=2, command=lambda: button_click(9))
         self.btn9.grid(row=1, column=2, sticky="nsew", pady=2, padx=4)
 
-        self.btn4 = tk.Button(self, text="4", font=("Arial", 30), height=2, command=lambda: button_click(4))
+        self.btn4 = tk.Button(self.calc, text="4", font=("Arial", 30), height=2, command=lambda: button_click(4))
         self.btn4.grid(row=2, column=0, sticky="nsew", pady=2, padx=4)
 
-        self.btn5 = tk.Button(self, text="5", font=("Arial", 30), height=2, command=lambda: button_click(5))
+        self.btn5 = tk.Button(self.calc, text="5", font=("Arial", 30), height=2, command=lambda: button_click(5))
         self.btn5.grid(row=2, column=1, sticky="nsew", pady=2, padx=4)
 
-        self.btn6 = tk.Button(self, text="6", font=("Arial", 30), height=2, command=lambda: button_click(6))
+        self.btn6 = tk.Button(self.calc, text="6", font=("Arial", 30), height=2, command=lambda: button_click(6))
         self.btn6.grid(row=2, column=2, sticky="nsew", pady=2, padx=4)
 
-        self.btn1 = tk.Button(self, text="1", font=("Arial", 30), height=2, command=lambda: button_click(1))
+        self.btn1 = tk.Button(self.calc, text="1", font=("Arial", 30), height=2, command=lambda: button_click(1))
         self.btn1.grid(row=3, column=0, sticky="nsew", pady=2, padx=4)
 
-        self.btn2 = tk.Button(self, text="2", font=("Arial", 30), height=2, command=lambda: button_click(2))
+        self.btn2 = tk.Button(self.calc, text="2", font=("Arial", 30), height=2, command=lambda: button_click(2))
         self.btn2.grid(row=3, column=1, sticky="nsew", pady=2, padx=4)
 
-        self.btn3 = tk.Button(self, text="3", font=("Arial", 30), height=2, command=lambda: button_click(3))
+        self.btn3 = tk.Button(self.calc, text="3", font=("Arial", 30), height=2, command=lambda: button_click(3))
         self.btn3.grid(row=3, column=2, sticky="nsew", pady=2, padx=4)
 
-        self.btn0 = tk.Button(self, text="0", font=("Arial", 30), height=2, command=lambda: button_click(0))
+        self.btn0 = tk.Button(self.calc, text="0", font=("Arial", 30), height=2, command=lambda: button_click(0))
         self.btn0.grid(row=4, column=1, sticky="nsew", pady=2, padx=4)
 
-        self.btn_del = tk.Button(self, text="C", font=("Arial", 30), height=2, command=lambda: button_click("del"))
+        self.btn_del = tk.Button(self.calc, text="C", font=("Arial", 30), height=2, command=lambda: button_click("del"))
         self.btn_del.grid(row=4, column=0, sticky="nsew", pady=2, padx=4)
 
-        self.btn_enter = tk.Button(self, text="=", font=("Arial", 30), height=2, command=lambda: button_click("enter"))
+        self.btn_enter = tk.Button(self.calc, text="=", font=("Arial", 30), height=2, command=lambda: button_click("enter"))
         self.btn_enter.grid(row=4, column=2, sticky="nsew", pady=2, padx=4)
 
+        self.calc.pack()
 
 class EndFrame(tk.Frame):
     def __init__(self, window):
