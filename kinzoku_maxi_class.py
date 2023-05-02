@@ -282,6 +282,7 @@ class GameFrame(tk.Frame):
             elif number == "enter" and self.done:
                 self.now_numbers = ""
                 self.window.counter += 1
+                self.counterlable.configure(text=f"")
                 new_question()
                 self.text.delete(1.0, "end")
                 self.text.insert(1.0, self.question + self.now_numbers)
@@ -291,11 +292,19 @@ class GameFrame(tk.Frame):
                     self.calc.destroy()
                     self.window.switch(EndFrame)
 
-        self.columnconfigure(0, weight=1)
-        self.columnconfigure(1, weight=1)
-        self.columnconfigure(2, weight=1)
-        self.columnconfigure(3, weight=1)
-        self.configure(bg="#24273a")
+
+        #infos
+
+        self.counterlable = tk.Label(self, text=f"Frage: {self.window.counter}",font=("Arial", 32), width=20, height=2, bg="#181926", fg="#cad3f5")
+
+
+
+        #calculator
+
+        self.calc.columnconfigure(0, weight=1)
+        self.calc.columnconfigure(1, weight=1)
+        self.calc.columnconfigure(2, weight=1)
+        self.calc.columnconfigure(3, weight=1)
 
         self.text = tk.Text(self.calc, font=("Arial", 32), width=20, height=2, bg="#181926", fg="#cad3f5", borderwidth=0,
                             highlightthickness=5, insertbackground="#cad3f5", highlightbackground="#494d64", )
