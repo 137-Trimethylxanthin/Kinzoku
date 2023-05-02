@@ -243,9 +243,22 @@ class GameFrame(tk.Frame):
         self.num1: int = 0
         self.num2: int = 0
         self.op: str = ""
-        self.window.geometry("800x650")
+        self.window.geometry("900x650")
+
+
+        self.infoL = tk.Frame(width=200, height=650, bg="#24273a")
+        self.infoL.pack_propagate(False)
+        self.infoL.pack(side="left")
+
         self.calc = tk.Frame(width=500, height=650, bg="#24273a")
         self.calc.pack_propagate(False)
+        self.calc.pack(side="left")
+
+        self.infoR = tk.Frame(width=200, height=650, bg="#24273a")
+        self.infoR.pack_propagate(False)
+        self.infoR.pack(side="right")
+
+
 
         def new_question():
             self.num1, self.num2, self.op = get_random_question()
@@ -264,7 +277,7 @@ class GameFrame(tk.Frame):
                 self.text.insert(1.0, self.question + self.now_numbers)
             elif number == "enter" and not self.done and self.now_numbers != "":
                 if test_answer(self.num1, self.num2, self.op, int(self.now_numbers)):
-                    self.text.delete(1.0, "End")
+                    self.text.delete(1.0, "end")
                     self.text.insert(1.0, "Richtig")
                     self.text.insert(2.0, f"\nZeit: {(time.time() - self.start_time).__round__(2)} s")
                     if (time.time() - self.start_time) < 10:
@@ -274,7 +287,7 @@ class GameFrame(tk.Frame):
                     else:
                         self.window.punkte += 1
                 else:
-                    self.text.delete(1.0, "End")
+                    self.text.delete(1.0, "end")
                     self.text.insert(1.0, "Falsch")
                     self.text.insert(2.0,
                                      f"\nrichtig: {self.question}{int(eval(f'{self.num1} {self.op} {self.num2}'))}")
@@ -282,9 +295,9 @@ class GameFrame(tk.Frame):
             elif number == "enter" and self.done:
                 self.now_numbers = ""
                 self.window.counter += 1
-                self.counterlable.configure(text=f"")
+                self.counterlable.configure(text=f"Frage: {self.window.counter}")
                 new_question()
-                self.text.delete(1.0, "End")
+                self.text.delete(1.0, "end")
                 self.text.insert(1.0, self.question + self.now_numbers)
                 self.start_time = time.time()
                 self.done = False
@@ -295,7 +308,12 @@ class GameFrame(tk.Frame):
 
         #infos
 
-        self.counterlable = tk.Label(self, text=f"Frage: {self.window.counter}",font=("Arial", 32), width=20, height=2, bg="#181926", fg="#cad3f5")
+        self.counterlable = tk.Label(self.infoL, text=f"Frage: {self.window.counter}",font=("Arial", 32), width=20, height=2, bg="#181926", fg="#cad3f5")
+        self.counterlable.pack()
+
+        self.counterlable2 = tk.Label(self.infoR, text=f"Frage: {self.window.counter}", font=("Arial", 32), width=20,
+                                     height=2, bg="#181926", fg="#cad3f5")
+        self.counterlable2.pack()
 
 
 
@@ -306,9 +324,11 @@ class GameFrame(tk.Frame):
         self.calc.columnconfigure(2, weight=1)
         self.calc.columnconfigure(3, weight=1)
 
-        self.text = tk.Text(self.calc, font=("Arial", 32), width=20, height=2, bg="#181926", fg="#cad3f5", borderwidth=0,
+
+        #text uses whole frame as its with length
+        self.text = tk.Text(self.calc, font=("Arial", 32),width=20, height=2, bg="#181926", fg="#cad3f5", borderwidth=0,
                             highlightthickness=5, insertbackground="#cad3f5", highlightbackground="#494d64", )
-        self.text.grid(columnspan=3, pady=20)
+        self.text.grid(columnspan=3, pady=20, sticky="nsew", padx=4)
         self.question = f"{self.num1} {self.op} {self.num2} = "
         self.text.delete(1.0, "end")
         self.text.insert(1.0, self.question)
@@ -349,7 +369,11 @@ class GameFrame(tk.Frame):
         self.btn_enter = tk.Button(self.calc, text="=", font=("Arial", 30), height=2, command=lambda: button_click("enter"))
         self.btn_enter.grid(row=4, column=2, sticky="nsew", pady=2, padx=4)
 
+
+        self.infoL.pack()
         self.calc.pack()
+        self.infoR.pack()
+
 
 class EndFrame(tk.Frame):
     def __init__(self, window):
