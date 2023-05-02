@@ -315,7 +315,8 @@ class GameFrame(tk.Frame):
         self.btn0 = tk.Button(self.calc, text="0", font=("Arial", 30), height=2, command=lambda: self.button_click(0))
         self.btn0.grid(row=4, column=1, sticky="nsew", pady=2, padx=4)
 
-        self.btn_del = tk.Button(self.calc, text="C", font=("Arial", 30), height=2, command=lambda: self.button_click("del"))
+        self.btn_del = tk.Button(self.calc, text="C", font=("Arial", 30), height=2,
+                                 command=lambda: self.button_click("del"))
         self.btn_del.grid(row=4, column=0, sticky="nsew", pady=2, padx=4)
 
         self.btn_enter = tk.Button(self.calc, text="=", font=("Arial", 30), height=2,
@@ -327,8 +328,9 @@ class GameFrame(tk.Frame):
         self.infoR.pack()
 
     def update_timer(self):
-        self.timeLabel.configure(text=f"Time: {time.time() - self.start_time} s")
+        self.timeLabel.configure(text=f"Time: {(time.time() - self.start_time).__round__(2)} s")
         print("update timer")
+        self.timer = self.after(100, self.update_timer)
 
     def new_question(self):
         self.num1, self.num2, self.op = get_random_question()
@@ -344,6 +346,7 @@ class GameFrame(tk.Frame):
             self.text.delete(1.0, "end")
             self.text.insert(1.0, self.question + self.now_numbers)
         elif number == "enter" and not self.done and self.now_numbers != "":
+            self.after_cancel(self.timer)
             if test_answer(self.num1, self.num2, self.op, int(self.now_numbers)):
                 self.text.delete(1.0, "end")
                 self.text.insert(1.0, "Richtig")
@@ -368,11 +371,11 @@ class GameFrame(tk.Frame):
             self.text.delete(1.0, "end")
             self.text.insert(1.0, self.question + self.now_numbers)
             self.start_time = time.time()
+            self.timer = self.after(100, self.update_timer)
             self.done = False
             if self.window.counter == 9:
                 self.calc.destroy()
                 self.window.switch(EndFrame)
-
 
 
 class EndFrame(tk.Frame):
