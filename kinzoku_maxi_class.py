@@ -27,13 +27,13 @@ if you fail you get 0 points
 
 def game_start():
     clear()
-    print("Hallo, willkommen bei dem Mathe Spiel")
-    print("Du hast 10 Fragen")
-    print("wenn du die Fragen in unter 10 Sekunden beantwortest bekommst du 3 Punkte")
-    print("Wenn du die Frage in unter 20 Sekunden beantwortest bekommst du 2 Punkte")
-    print("Wenn du die Frage länger als 20 Sekunden beantwortest bekommst du 1 Punkt")
-    print("Wenn du die Frage falsch beantwortest bekommst du 0 Punkte")
-    print("Wenn du bereit bist drücke Enter")
+    print("Hallo, willkommen bei dem Mathespiel.")
+    print("Du bekommst 10 Fragen zum Antworten.")
+    print("Wenn du die Frage in unter 10 Sekunden beantwortest, bekommst du 3 Punkte.")
+    print("Wenn du die Frage in unter 20 Sekunden beantwortest, bekommst du 2 Punkte.")
+    print("Wenn du für die Beantwortung länger als 20 Sekunden brauchst, bekommst du 1 Punkt.")
+    print("Wenn du die Frage falsch beantwortest, bekommst du 0 Punkte.")
+    print("Drücke die Enter-Taste zum Starten.")
     input()
 
 
