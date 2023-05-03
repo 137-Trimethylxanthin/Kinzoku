@@ -46,15 +46,29 @@ if you fail you get 0 points
 
 
 def game_start():
+    difficulty: int = None
+    while difficulty not in [0, 1, 2]:
+        clear()
+        print("Hallo, willkommen bei dem Mathespiel.")
+        print("Du bekommst 10 Fragen zum Antworten.")
+        print("Wenn du die Frage in unter 10 Sekunden beantwortest, bekommst du 3 Punkte.")
+        print("Wenn du die Frage in unter 20 Sekunden beantwortest, bekommst du 2 Punkte.")
+        print("Wenn du für die Beantwortung länger als 20 Sekunden brauchst, bekommst du 1 Punkt.")
+        print("Wenn du die Frage falsch beantwortest, bekommst du 0 Punkte.")
+        print("EasyMode: Du bekommst 2-6 antworten zur Auswahl, wähle die richtige aus.")
+        print("NormalMode: Du musst die Antwort selber eingeben. aber kein ergebniss geht über 2000 und ist immer "
+              "ganzstellig")
+        print("HardMode: Du musst die Antwort selber eingeben. ES WIRD IMMER ABGERUNDET")
+        print("Wähle den Schwierigkeitsgrad")
+        print("0: EasyMode")
+        print("1: NormalMode")
+        print("2: HardMode")
+        difficulty = custom_input("Schwierigkeitsgrad: ")
     clear()
-    print("Hallo, willkommen bei dem Mathespiel.")
-    print("Du bekommst 10 Fragen zum Antworten.")
-    print("Wenn du die Frage in unter 10 Sekunden beantwortest, bekommst du 3 Punkte.")
-    print("Wenn du die Frage in unter 20 Sekunden beantwortest, bekommst du 2 Punkte.")
-    print("Wenn du für die Beantwortung länger als 20 Sekunden brauchst, bekommst du 1 Punkt.")
-    print("Wenn du die Frage falsch beantwortest, bekommst du 0 Punkte.")
-    print("Drücke die Enter-Taste zum Starten.")
-    input()
+    return difficulty
+
+
+
 
 
 def get_division(dificulty: int = 1):
@@ -104,7 +118,6 @@ def get_addition(dificulty: int = 1):
 
 
 def get_random_question(dificulty: int = 1):
-    print("dificulty", dificulty)
     operator: str = random.choice(['+', '-', '*', '/'])
     num1: int = 0
     num2: int = 0
@@ -140,9 +153,16 @@ def test_answer(num1, num2, op, answer: int):
         return False
 
 
-def end_game(punkte: int):
+def end_game(punkte: int, d: int):
     term_x: int = os.get_terminal_size().columns
     term_y: int = os.get_terminal_size().lines
+
+    if d == 0:
+        difficulty = "Easy"
+    elif d == 1:
+        difficulty = "Normal"
+    elif d == 2:
+        difficulty = "Hard"
 
     clear()
     print("Das Spiel ist zu Ende".center(term_x, "-"))
@@ -153,6 +173,8 @@ def end_game(punkte: int):
         print(f"Du hast {punkte} Punkt".center(term_x))
     else:
         print(f"Du hast {punkte} Punkte erreicht".center(term_x))
+
+    print(f"du hast auf der Schwierigkeit {difficulty} gespielt".center(term_x))
 
     if punkte == 30:
         print("Du hast alle Fragen unter 10 sekunden beantwortet".center(term_x))
@@ -169,25 +191,47 @@ def end_game(punkte: int):
         print()
 
 
-def fake_awnser(awnser: int):
-    if awnser <= 100:
+def fake_answer(answer: int):
+    if answer <= 100:
         return random.randint(0, 100)
     else:
-        return random.randint(awnser - 100, awnser + 100)
+        return random.randint(answer - 100, answer + 100)
 
 
 def game_cli():
-    game_start()
+    difficulty:int = game_start()
+    answers_list: list[int] = []
     questions: int = 10
     points: int = 0
+    ammount: int = 1
+    choice: int = 0
     clear()
     while questions > 0:
-        num1, num2, op = get_random_question()
-        start = time.time()
-        answer: int = custom_input(f"{num1} {op} {num2} = ")
+        num1, num2, op = get_random_question(difficulty)
+        if difficulty == 0:
+            answers_list.append(int(eval(f"{num1} {op} {num2}")))
+            for i in range(ammount):
+                answers_list.append(fake_answer(int(eval(f"{num1} {op} {num2}"))))
+            random.shuffle(answers_list)
+            start = time.time()
+            while choice < 1 or choice > len(answers_list):
+                clear()
+                print(f"{num1} {op} {num2} = ")
+                for i in range(len(answers_list)):
+                    print(f"{i + 1}: {answers_list[i]}")
+                choice: int = custom_input("Antwort: ")
+            answer = int(answers_list[choice - 1])
+            print(answers_list, answer)
+            answers_list.clear()
+            choice = 0
+        else:
+            start = time.time()
+            answer: int = custom_input(f"{num1} {op} {num2} = ")
         end = time.time()
         questions -= 1
         timer: float = end - start
+        clear()
+        print(f"{num1} {op} {num2} = {answer}")
         if test_answer(num1, num2, op, answer):
             print("Richtig")
             if timer <= 10:
@@ -196,9 +240,14 @@ def game_cli():
                 points += 2
             else:
                 points += 1
+
+            if ammount <= 6:
+                ammount += 1
         else:
             print("Falsch")
             print(f"Die richtige Antwort ist {int(eval(f'{num1} {op} {num2}'))}")
+            if ammount > 1:
+                ammount -= 1
 
         print(f"Du hast {timer.__round__(2)} Sekunden gebraucht")
         if questions == 1:
@@ -210,7 +259,7 @@ def game_cli():
             print(f"Du hast noch {questions} Fragen")
             print(f"-------------------Nächste Frage-------------------")
 
-    end_game(points)
+    end_game(points, difficulty)
 
 
 class Gui(tk.Tk):
@@ -512,7 +561,7 @@ class GameFrame(tk.Frame):
         if self.window.mode.get() == 0:
             self.awnsers[0] = int(eval(self.question[:-2]))
             for i in range(1, 6):
-                self.awnsers[i] = fake_awnser(self.awnsers[0])
+                self.awnsers[i] = fake_answer(self.awnsers[0])
             # if self.window.punkte < 5:
             #    self.awnsers[1] = fake_awnser(self.awnsers[0])
             # else:
