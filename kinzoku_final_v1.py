@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-version: str = "1.0.1"
+version: str = "1.1.0"
 import argparse
 import os
 import random
@@ -66,9 +66,6 @@ def game_start():
         difficulty = custom_input("Schwierigkeitsgrad: ")
     clear()
     return difficulty
-
-
-
 
 
 def get_division(dificulty: int = 1):
@@ -199,7 +196,7 @@ def fake_answer(answer: int):
 
 
 def game_cli():
-    difficulty:int = game_start()
+    difficulty: int = game_start()
     answers_list: list[int] = []
     questions: int = 10
     points: int = 0
@@ -346,12 +343,14 @@ class GameFrame(tk.Frame):
         self.done: bool = False
         self.num1: int = 0
         self.num2: int = 0
-        self.awnsers: list[int] = [0, 0, 0, 0, 0, 0]
+        self.awnsers: list[int] = []
         self.window.choise.set(0)
         self.op: str = ""
+        self.indexOutOfBounds = False
         self.timeRemaining: str = ""
         self.timer = self.after(100, self.update_timer)
         self.window.capture = self.window.bind("<KeyPress>", self.key_press)
+        self.ammount: int = 1
 
         self.infoL = tk.Frame(width=300, height=650, bg=theme["Base"], )
         self.infoL.pack_propagate(False)
@@ -424,28 +423,28 @@ class GameFrame(tk.Frame):
                                           cursor="hand2")
             self.choise1.grid(row=1, column=1, sticky="nsew", padx=10, pady=10)
 
-            self.choise2 = tk.Radiobutton(self.calc, text=f"{self.awnsers[2]}", font=("Arial", 30, "bold"),
+            self.choise2 = tk.Radiobutton(self.calc, text=f"", font=("Arial", 30, "bold"),
                                           variable=self.window.choise,
                                           value=2, bg="#24273a", fg="#cad3f5", selectcolor="#24273a",
                                           activebackground="#24273a", activeforeground=theme["Overlay0"],
                                           cursor="hand2")
             self.choise2.grid(row=1, column=2, sticky="nsew", padx=10, pady=10)
 
-            self.choise3 = tk.Radiobutton(self.calc, text=f"{self.awnsers[3]}", font=("Arial", 30, "bold"),
+            self.choise3 = tk.Radiobutton(self.calc, text=f"", font=("Arial", 30, "bold"),
                                           variable=self.window.choise,
                                           value=3, bg="#24273a", fg="#cad3f5", selectcolor="#24273a",
                                           activebackground="#24273a", activeforeground=theme["Overlay0"],
                                           cursor="hand2")
             self.choise3.grid(row=2, column=0, sticky="nsew", padx=10, pady=10)
 
-            self.choise4 = tk.Radiobutton(self.calc, text=f"{self.awnsers[4]}", font=("Arial", 30, "bold"),
+            self.choise4 = tk.Radiobutton(self.calc, text=f"", font=("Arial", 30, "bold"),
                                           variable=self.window.choise,
                                           value=4, bg="#24273a", fg="#cad3f5", selectcolor="#24273a",
                                           activebackground="#24273a", activeforeground=theme["Overlay0"],
                                           cursor="hand2")
             self.choise4.grid(row=2, column=1, sticky="nsew", padx=10, pady=10)
 
-            self.choise5 = tk.Radiobutton(self.calc, text=f"{self.awnsers[5]}", font=("Arial", 30, "bold"),
+            self.choise5 = tk.Radiobutton(self.calc, text=f"", font=("Arial", 30, "bold"),
                                           variable=self.window.choise,
                                           value=5, bg="#24273a", fg="#cad3f5", selectcolor="#24273a",
                                           activebackground="#24273a", activeforeground=theme["Overlay0"],
@@ -559,20 +558,22 @@ class GameFrame(tk.Frame):
         self.question = f"{self.num1} {self.op} {self.num2} = "
 
         if self.window.mode.get() == 0:
-            self.awnsers[0] = int(eval(self.question[:-2]))
-            for i in range(1, 6):
-                self.awnsers[i] = fake_answer(self.awnsers[0])
-            # if self.window.punkte < 5:
-            #    self.awnsers[1] = fake_awnser(self.awnsers[0])
-            # else:
-            #    for i in range(self.window.punkte % 5):
-            #        self.awnsers[i + 1] = fake_awnser(self.awnsers[0])
+            self.awnsers = []
+            self.awnsers.append(int(eval(self.question[:-2])))
+            for i in range(self.ammount):
+                self.awnsers.append(fake_answer(self.awnsers[0]))
             random.shuffle(self.awnsers)
 
     def button_click(self, number):
 
         if self.window.mode.get() == 0:
-            self.now_numbers = str(self.awnsers[self.window.choise.get()])
+            if self.window.choise.get() > self.ammount:
+                self.indexOutOfBounds = True
+            else:
+                self.indexOutOfBounds = False
+                self.now_numbers = str(self.awnsers[self.window.choise.get()])
+
+
 
         if number != "del" and number != "enter" and not self.done:
             self.now_numbers += str(number)
@@ -580,7 +581,7 @@ class GameFrame(tk.Frame):
         elif number == "del" and not self.done:
             self.now_numbers = self.now_numbers[:-1]
             self.text.configure(text=self.question + self.now_numbers)
-        elif number == "enter" and not self.done and self.now_numbers != "":
+        elif number == "enter" and not self.done and self.now_numbers != "" and not self.indexOutOfBounds:
             self.window.counter += 1
             self.after_cancel(self.timer)
             self.timeLabel.configure(text=f"{(time.time() - self.start_time).__round__(2)} s/{self.timeRemaining}s")
@@ -592,9 +593,13 @@ class GameFrame(tk.Frame):
                     self.window.punkte += 2
                 else:
                     self.window.punkte += 1
+                if self.ammount < 6:
+                    self.ammount += 1
             else:
                 self.text.configure(
                     text=f"Falsch\nrichtig: {self.question}{int(eval(f'{self.num1} {self.op} {self.num2}')).__round__(2)}")
+                if self.ammount > 1:
+                    self.ammount -= 1
             self.done = True
             self.punkteLabel.configure(text=f"Punkte: {self.window.punkte}/{(self.window.counter - 1) * 3}")
             self.window.startOfGame += (time.time() - self.start_time).__round__(2)
@@ -605,17 +610,23 @@ class GameFrame(tk.Frame):
                 self.choise3.configure(text="")
                 self.choise4.configure(text="")
                 self.choise5.configure(text="")
+
         elif number == "enter" and self.done:
+
             self.now_numbers = ""
             self.CounterLabel.configure(text=f"Frage: {self.window.counter}/{self.window.rounds}")
             self.new_question()
             if self.window.mode.get() == 0:
                 self.choise0.configure(text=self.awnsers[0])
                 self.choise1.configure(text=self.awnsers[1])
-                self.choise2.configure(text=self.awnsers[2])
-                self.choise3.configure(text=self.awnsers[3])
-                self.choise4.configure(text=self.awnsers[4])
-                self.choise5.configure(text=self.awnsers[5])
+                if self.ammount > 1:
+                    self.choise2.configure(text=self.awnsers[2])
+                if self.ammount > 2:
+                    self.choise3.configure(text=self.awnsers[3])
+                if self.ammount > 3:
+                    self.choise4.configure(text=self.awnsers[4])
+                if self.ammount > 4:
+                    self.choise5.configure(text=self.awnsers[5])
 
             self.text.configure(text=self.question)
             self.start_time = time.time()
@@ -643,7 +654,7 @@ class EndFrame(tk.Frame):
             mode = "Easy"
 
         self.lable = tk.Label(self, text=f"Vorbei\nDu hast auf {mode}-mode {self.window.punkte}"
-                                         f" punkte erhalten\nDu hast dafür nur{self.window.startOfGame}",
+                                         f" punkte erhalten\nDu hast dafür nur {self.window.startOfGame}s gebraucht",
                               font=("Arial", 30),
                               bg="#24273a", fg="#cad3f5", borderwidth=2, relief="groove", padx=10, pady=10, height=3,
                               width=40, anchor="center", justify="center")
