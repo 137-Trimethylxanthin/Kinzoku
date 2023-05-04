@@ -31,19 +31,6 @@ def clear():
     os.system('cls' if os.name == 'nt' else 'clear')
 
 
-"""
-a game the language is German
-
-the game is a math game where you have to answer 10 questions
-the questions are about multiplication and division and addition and subtraction
-the questions are random in the thousand range
-under 10 seconds you get 3 points
-under 20 seconds you get 2 points
-over 20 seconds you get 1 point
-
-if you fail you get 0 points
-"""
-
 
 def game_start():
     difficulty: int = None
@@ -202,6 +189,10 @@ def game_cli():
     points: int = 0
     ammount: int = 1
     choice: int = 0
+    last_question: str = ""
+    last_answer: str = ""
+    last_time: str = ""
+    last_right: str = ""
     clear()
     while questions > 0:
         num1, num2, op = get_random_question(difficulty)
@@ -213,6 +204,11 @@ def game_cli():
             start = time.time()
             while choice < 1 or choice > len(answers_list):
                 clear()
+                if questions != 10:
+                    print(f"last question: {last_question} | {last_right}")
+                    print(f"answer: {last_answer}")
+                    print(f"time before: {last_time}s")
+                    print(f"-----------------")
                 print(f"{num1} {op} {num2} = ")
                 for i in range(len(answers_list)):
                     print(f"{i + 1}: {answers_list[i]}")
@@ -245,13 +241,22 @@ def game_cli():
             print(f"Die richtige Antwort ist {int(eval(f'{num1} {op} {num2}'))}")
             if ammount > 1:
                 ammount -= 1
+        if difficulty == 0:
+            last_answer = str(int(eval(f"{num1} {op} {num2}")))
+            last_question = f"{num1} {op} {num2} = {answer}"
+            last_time = str(timer.__round__(2))
+            if test_answer(num1, num2, op, answer):
+                last_right = "Richtig"
+            else:
+                last_right = "Falsch"
 
         print(f"Du hast {timer.__round__(2)} Sekunden gebraucht")
         if questions == 1:
             print(f"Du hast noch {questions} Frage, lets go")
             print(f"-------------------Nächste Frage-------------------")
         elif questions == 0:
-            pass
+            print(f"Du hast noch {questions} Fragen, lets go")
+            print(f"-------------------Nächste Frage-------------------")
         else:
             print(f"Du hast noch {questions} Fragen")
             print(f"-------------------Nächste Frage-------------------")
@@ -585,6 +590,7 @@ class GameFrame(tk.Frame):
             self.window.counter += 1
             self.after_cancel(self.timer)
             self.timeLabel.configure(text=f"{(time.time() - self.start_time).__round__(2)} s/{self.timeRemaining}s")
+
             if test_answer(self.num1, self.num2, self.op, int(self.now_numbers)):
                 self.text.configure(text=f"Richtig\n{self.question}{self.now_numbers}")
                 if (time.time() - self.start_time) < 10:
@@ -593,13 +599,14 @@ class GameFrame(tk.Frame):
                     self.window.punkte += 2
                 else:
                     self.window.punkte += 1
-                if self.ammount < 6:
+                if self.ammount <= 5:
                     self.ammount += 1
             else:
                 self.text.configure(
                     text=f"Falsch\nrichtig: {self.question}{int(eval(f'{self.num1} {self.op} {self.num2}')).__round__(2)}")
                 if self.ammount > 1:
                     self.ammount -= 1
+            print(self.ammount)
             self.done = True
             self.punkteLabel.configure(text=f"Punkte: {self.window.punkte}/{(self.window.counter - 1) * 3}")
             self.window.startOfGame += (time.time() - self.start_time).__round__(2)
@@ -632,7 +639,7 @@ class GameFrame(tk.Frame):
             self.start_time = time.time()
             self.timer = self.after(100, self.update_timer)
             self.done = False
-            if self.window.counter >= self.window.rounds:
+            if self.window.counter >= self.window.rounds+1:
                 self.calc.destroy()
                 self.infoL.destroy()
                 self.infoR.destroy()
