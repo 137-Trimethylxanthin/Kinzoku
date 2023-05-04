@@ -190,6 +190,7 @@ def game_cli():
     ammount: int = 1
     choice: int = 0
     last_question: str = ""
+    question_left: int = 0
     last_answer: str = ""
     last_time: str = ""
     last_right: str = ""
@@ -208,6 +209,7 @@ def game_cli():
                     print(f"last question: {last_question} | {last_right}")
                     print(f"answer: {last_answer}")
                     print(f"time before: {last_time}s")
+                    print(f"questions left: {question_left}")
                     print(f"-----------------")
                 print(f"{num1} {op} {num2} = ")
                 for i in range(len(answers_list)):
@@ -234,7 +236,7 @@ def game_cli():
             else:
                 points += 1
 
-            if ammount <= 6:
+            if ammount <= 4:
                 ammount += 1
         else:
             print("Falsch")
@@ -245,6 +247,7 @@ def game_cli():
             last_answer = str(int(eval(f"{num1} {op} {num2}")))
             last_question = f"{num1} {op} {num2} = {answer}"
             last_time = str(timer.__round__(2))
+            question_left = f"Du hast noch {questions} Fragen"
             if test_answer(num1, num2, op, answer):
                 last_right = "Richtig"
             else:
@@ -661,7 +664,7 @@ class EndFrame(tk.Frame):
             mode = "Easy"
 
         self.lable = tk.Label(self, text=f"Vorbei\nDu hast auf {mode}-mode {self.window.punkte}"
-                                         f" punkte erhalten\nDu hast dafür nur {self.window.startOfGame}s gebraucht",
+                                         f" punkte erhalten\nDu hast dafür nur {round(self.window.startOfGame, 2)}s gebraucht",
                               font=("Arial", 30),
                               bg="#24273a", fg="#cad3f5", borderwidth=2, relief="groove", padx=10, pady=10, height=3,
                               width=40, anchor="center", justify="center")
